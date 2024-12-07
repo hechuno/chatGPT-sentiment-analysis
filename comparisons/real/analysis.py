@@ -2,8 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats as stats
-from scipy.stats import shapiro, mannwhitneyu, spearmanr
+import numpy as np
+from scipy.stats import shapiro, mannwhitneyu, spearmanr, f_oneway
 from itertools import combinations
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 #Reading Values
 df = pd.read_csv("BuzzFeed_real_news_grouped_temp_data_diff.csv")
@@ -114,6 +116,22 @@ def mann_whitney():
         print("-" * 50)
 #mann_whitney()
 
+def anova():
+    diff_temp0 = df['diff_sentiment_temp0']
+    diff_temp05 = df['diff_sentiment_temp0.5']
+    diff_temp1 = df['diff_sentiment_temp1']
+    anova_result = f_oneway(diff_temp0, diff_temp05, diff_temp1)
+    print("ANOVA Results:")
+    print(f"F-Statistic: {anova_result.statistic:.4f}, p-value: {anova_result.pvalue:.4e}")
+
+    # Interpret the results
+    if anova_result.pvalue < 0.05:
+        print("Result: Significant differences between group means (reject H0).")
+    else:
+        print("Result: No significant differences between group means (fail to reject H0).")
+        
+anova()
+
 #Spearman Correlation (If Original Article Sent Score higher, does that mean generated also higher?)
 def spearman():
     comparisons = [
@@ -166,6 +184,25 @@ def outliers():
     print(outliers[['text'] + diff_columns])       
 #outliers()
 
+def outliers_z(threshold=3):
+    diff_columns = ['diff_sentiment_temp0', 'diff_sentiment_temp0.5', 'diff_sentiment_temp1']
+    z_outliers = pd.DataFrame()
+    for col in diff_columns:
+        mean = df[col].mean()
+        std = df[col].std()
+        z_scores = (df[col] - mean) / std
+        z_outliers[col] = np.abs(z_scores) > threshold  # Mark True for outliers
+
+    # Combine results to create a final column indicating any outliers across the columns
+    df['is_outlier_zscore'] = z_outliers.any(axis=1)
+    
+    outliers_z = df[df['is_outlier_zscore']]
+    outliers_z.to_csv("BuzzFeed_Zoutliers_real.csv", index=False)
+    
+    print(f"Total Outliers: {len(outliers_z)}")
+    print(outliers_z[['text'] + diff_columns])   
+#outliers_z()
+
 def main_menu():
     while True:
         print("\n--- Data Analysis: Main Menu ---")
@@ -201,11 +238,11 @@ def main_menu():
             mann_whitney()
         elif choice == '7':
             print("\nDetecting Outliers...")
-            outliers()
+            #outliers()
         elif choice == '8':
             print("\nExiting the program. Goodbye!")
             break
         else:
             print("\nInvalid option. Please try again.")
 
-main_menu()
+#main_menu()

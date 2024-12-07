@@ -2,7 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats as stats
-from scipy.stats import shapiro, mannwhitneyu
+import numpy as np
+from scipy.stats import shapiro, mannwhitneyu, spearmanr, f_oneway
 from itertools import combinations
 
 df = pd.read_csv("BuzzFeed_fake_news_grouped_temp_data_diff.csv")
@@ -96,7 +97,7 @@ def shapiro_wilk():
 #plot_QQ()
 #shapiro_wilk()
 
-#According to the shapiro-wilk test, the dataset for temp0 is not normal.
+#According to the shapiro-wilk test, the datasets are normal with a
 
 #Mann-Whitney Test, si tiene novalidad, ANOVA para comparar todas
 
@@ -121,6 +122,47 @@ def mann_whitney():
         
 #mann_whitney()
 
+def anova():
+    diff_temp0 = df['diff_sentiment_temp0']
+    diff_temp05 = df['diff_sentiment_temp0.5']
+    diff_temp1 = df['diff_sentiment_temp1']
+    anova_result = f_oneway(diff_temp0, diff_temp05, diff_temp1)
+    print("ANOVA Results:")
+    print(f"F-Statistic: {anova_result.statistic:.4f}, p-value: {anova_result.pvalue:.4e}")
+
+    # Interpret the results
+    if anova_result.pvalue < 0.05:
+        print("Result: Significant differences between group means (reject H0).")
+    else:
+        print("Result: No significant differences between group means (fail to reject H0).")
+        
+#anova()
+
+#Spearman Correlation (If Original Article Sent Score higher, does that mean generated also higher?)
+def spearman():
+    comparisons = [
+        ("Original vs Temp0", orig_per_word, temp0_per_word),
+        ("Original vs Temp0.5", orig_per_word, temp05_per_word),
+        ("Original vs Temp1", orig_per_word, temp1_per_word),
+    ]
+    
+    print("Spearman's Rank Correlation Results:")
+    print("-" * 50)
+    
+    for label, data1, data2 in comparisons:
+        # Compute Spearman's correlation
+        rho, p = spearmanr(data1, data2)
+        
+        # Display results
+        print(f"{label}")
+        print(f"  Spearman's Correlation (ρ): {rho:.4f}")
+        print(f"  p-value: {p:.4e}")
+        if p > 0.05:
+            print("  Result: No significant monotonic relationship.")
+        else:
+            print("  Result: Significant monotonic relationship.")
+        print("-" * 50)
+#spearman()
 
 #Find outliers with IQR method, can do with valores z
 def outliers():
@@ -149,46 +191,65 @@ def outliers():
         
 #outliers()
 
+def outliers_z(threshold=3):
+    diff_columns = ['diff_sentiment_temp0', 'diff_sentiment_temp0.5', 'diff_sentiment_temp1']
+    z_outliers = pd.DataFrame()
+    for col in diff_columns:
+        mean = df[col].mean()
+        std = df[col].std()
+        z_scores = (df[col] - mean) / std
+        z_outliers[col] = np.abs(z_scores) > threshold  # Mark True for outliers
+
+    # Combine results to create a final column indicating any outliers across the columns
+    df['is_outlier_zscore'] = z_outliers.any(axis=1)
+    
+    outliers_z = df[df['is_outlier_zscore']]
+    outliers_z.to_csv("BuzzFeed_Zoutliers_real.csv", index=False)
+    
+    print(f"Total Outliers: {len(outliers_z)}")
+    print(outliers_z[['text'] + diff_columns])   
+#outliers_z()
+
 def main_menu():
     while True:
-        print("\n--- Análisis de Datos: Menú Principal ---")
-        print("1. Mostrar Histograma")
-        print("2. Mostrar Densidad")
-        print("3. Mostrar Boxplot")
-        print("4. Mostrar Q-Q Plot (Prueba de Normalidad)")
-        print("5. Realizar Prueba Shapiro-Wilk (Normalidad)")
-        print("6. Realizar Prueba Mann-Whitney U (Comparación)")
-        print("7. Detectar Outliers (IQR)")
-        print("8. Salir")
+        print("\n--- Data Analysis: Main Menu ---")
+        print("1. Show Histogram")
+        print("2. Show Density Plot")
+        print("3. Show Boxplot")
+        print("4. Show Q-Q Plot (Normality Test)")
+        print("5. Perform Shapiro-Wilk Test (Normality)")
+        print("6. Perform Mann-Whitney U Test (Comparison)")
+        print("7. Detect Outliers (IQR)")
+        print("8. Exit")
         
-        # Solicitar entrada del usuario
-        choice = input("Seleccione una opción (1-8): ").strip()
+        # Get user input
+        choice = input("Select an option (1-8): ").strip()
 
         if choice == '1':
-            print("\nGenerando Histograma...")
+            print("\nGenerating Histogram...")
             plot_histogram()
         elif choice == '2':
-            print("\nGenerando Densidad...")
+            print("\nGenerating Density Plot...")
             plot_density()
         elif choice == '3':
-            print("\nGenerando Boxplot...")
+            print("\nGenerating Boxplot...")
             plot_boxplot()
         elif choice == '4':
-            print("\nGenerando Q-Q Plot...")
+            print("\nGenerating Q-Q Plot...")
             plot_QQ()
         elif choice == '5':
-            print("\nRealizando Prueba Shapiro-Wilk...")
+            print("\nPerforming Shapiro-Wilk Test...")
             shapiro_wilk()
         elif choice == '6':
-            print("\nRealizando Prueba Mann-Whitney U...")
+            print("\nPerforming Mann-Whitney U Test...")
             mann_whitney()
         elif choice == '7':
-            print("\nDetectando Outliers...")
-            outliers()
+            print("\nDetecting Outliers...")
+            #outliers()
         elif choice == '8':
-            print("\nSaliendo del programa. ¡Hasta luego!")
+            print("\nExiting the program. Goodbye!")
             break
         else:
-            print("\nOpción inválida. Por favor, intente nuevamente.")
-            
-main_menu()
+            print("\nInvalid option. Please try again.")
+
+#main_menu()
