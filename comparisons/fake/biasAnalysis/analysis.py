@@ -85,9 +85,9 @@ def plot_boxplot_left():
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=boxplot_data_long, x='Temperature', y='Sentiment', palette='Set2')
 
-    plt.title('Boxplot of Sentiment per Word (Different Temperatures)', fontsize=16)
+    plt.title('Boxplot of Sentiment per Word Fake News Left Bias (Different Temperatures)', fontsize=16)
     plt.xlabel('Temperature', fontsize=14)
-    plt.ylabel('Sentiment Value', fontsize=14)
+    plt.ylabel('Sentiment Value per Word', fontsize=14)
     plt.show()
     
 def plot_boxplot_right():
@@ -102,9 +102,9 @@ def plot_boxplot_right():
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=boxplot_data_long, x='Temperature', y='Sentiment', palette='Set2')
 
-    plt.title('Boxplot of Sentiment per Word (Different Temperatures)', fontsize=16)
+    plt.title('Boxplot of Sentiment per Word Fake News Right Bias (Different Temperatures)', fontsize=16)
     plt.xlabel('Temperature', fontsize=14)
-    plt.ylabel('Sentiment Value', fontsize=14)
+    plt.ylabel('Sentiment Value per Word', fontsize=14)
     plt.show()
     
 #plot_histogram_left()

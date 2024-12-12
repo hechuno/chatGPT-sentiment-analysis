@@ -33,7 +33,7 @@ def plot_density():
     sns.kdeplot(temp05_per_word, color='green', label='Temp0.5 Sentiment', linewidth=2)
     sns.kdeplot(temp1_per_word, color='red', label='Temp1 Sentiment', linewidth=2)
 
-    plt.title('Density Plot of Sentiment per Word (Different Temperatures)', fontsize=16)
+    plt.title('Density Plot of Sentiment per Word for Fake News (Different Temperatures)', fontsize=16)
     plt.xlabel('Sentiment Value', fontsize=14)
     plt.ylabel('Density', fontsize=14)
     plt.legend()
@@ -52,9 +52,9 @@ def plot_boxplot():
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=boxplot_data_long, x='Temperature', y='Sentiment', palette='Set2')
 
-    plt.title('Boxplot of Sentiment per Word (Different Temperatures)', fontsize=16)
+    plt.title('Boxplot of Sentiment per Word for Fake News (Different Temperatures)', fontsize=16)
     plt.xlabel('Temperature', fontsize=14)
-    plt.ylabel('Sentiment Value', fontsize=14)
+    plt.ylabel('Sentiment Value per Word', fontsize=14)
     plt.show()
     
 #plot_histogram()
@@ -68,11 +68,12 @@ def plot_QQ():
     labels = ["Original", "Temp0", "Temp0.5", "Temp1"]
 
     # Create subplots
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(10, 8))
     for i, (data, label) in enumerate(zip(data_list, labels), start=1):
         plt.subplot(2, 2, i)  # 2x2 grid of subplots
         stats.probplot(data, dist="norm", plot=plt)
-        plt.title(f"Q-Q Plot: {label}")
+        plt.title(f"Q-Q Plot for Fake News: {label}")
+        plt.ylabel("Sentimental Score per Word")
 
     plt.tight_layout()  # Adjust spacing between plots
     plt.show()
@@ -97,7 +98,7 @@ def shapiro_wilk():
 #plot_QQ()
 #shapiro_wilk()
 
-#According to the shapiro-wilk test, the datasets are normal with a
+#According to the shapiro-wilk test, the datasets are normal with a level of significance of 0.01.
 
 #Mann-Whitney Test, si tiene novalidad, ANOVA para comparar todas
 
@@ -162,7 +163,7 @@ def spearman():
         else:
             print("  Result: Significant monotonic relationship.")
         print("-" * 50)
-#spearman()
+spearman()
 
 #Find outliers with IQR method, can do with valores z
 def outliers():
@@ -204,7 +205,7 @@ def outliers_z(threshold=3):
     df['is_outlier_zscore'] = z_outliers.any(axis=1)
     
     outliers_z = df[df['is_outlier_zscore']]
-    outliers_z.to_csv("BuzzFeed_Zoutliers_real.csv", index=False)
+    outliers_z.to_csv("BuzzFeed_Zoutliers_fake.csv", index=False)
     
     print(f"Total Outliers: {len(outliers_z)}")
     print(outliers_z[['text'] + diff_columns])   
