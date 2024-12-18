@@ -57,9 +57,9 @@ def plot_boxplot():
     plt.ylabel('Sentiment Value per Word', fontsize=14)
     plt.show()
     
-#plot_histogram()
-#plot_density()    
-#plot_boxplot()
+plot_histogram()
+plot_density()    
+plot_boxplot()
 
 #Test Normality
 
@@ -163,7 +163,7 @@ def spearman():
         else:
             print("  Result: Significant monotonic relationship.")
         print("-" * 50)
-spearman()
+#spearman()
 
 #Find outliers with IQR method, can do with valores z
 def outliers():
